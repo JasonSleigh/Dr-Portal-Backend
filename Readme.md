@@ -8,15 +8,8 @@ Authentication and account management.
 
 ### Table: users
 
-| Field | Type | Required | Constraints | Description |
-|---------|---------|---------|---------|---------|
-| id | UUID | ✅ | PK | Unique user identifier |
-| email | VARCHAR(255) | ✅ | UNIQUE | Login email address |
-| password_hash | VARCHAR(255) | ✅ | | Secure password hash |
-| is_verified | BOOLEAN | ✅ | DEFAULT FALSE | Doctor verification status |
-| is_active | BOOLEAN | ✅ | DEFAULT TRUE | Account active status |
-| created_at | TIMESTAMP | ✅ | | Account creation timestamp |
-| last_login | TIMESTAMP | ❌ | | Last successful login |
+<img width="1691" height="713" alt="image" src="https://github.com/user-attachments/assets/c55418dd-300b-4875-9321-1546c45cce55" />
+
 
 ---
 
