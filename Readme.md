@@ -122,7 +122,7 @@ Lookup table defining medical and surgical sub-specialities across jurisdictions
 4. doctor_profiles
 Holds extended professional details, practice affiliations, qualification credentials, and directory metadata for doctors and specialists.
 
-![alt text](database_images/doctor_profiles_table.png)
+![alt text](database_images/doctor_profiles.png)
 
 5. doctor_verifications
 
