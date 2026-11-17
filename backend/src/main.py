@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from backend.src.user.routes.user_routes import router as user_router
 
 app = FastAPI(
 	title="DRPortal Backend API", 
@@ -9,3 +10,5 @@ app = FastAPI(
 @app.get("/")
 def root():
 	return {"Message": "Hello World"}
+
+app.include_router(user_router, prefix="/api/v1", target=["users"])
