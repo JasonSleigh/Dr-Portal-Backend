@@ -1,13 +1,32 @@
 from sqlalchemy.orm import Session
-from backend.src.user.schemas.user_schemas import UserCreate, UserResponse
+from fastapi import HTTPException, status
+from backend.src.user.schemas.user_schemas import UserCreate
 from backend.src.user.model.user_model import User, UUID_SQL
-from uuid import uuid4
 from datetime import datetime, timezone
+from passlib.context import CryptContext
 
-def create_user(db: Session, user: UserCreate) -> UserResponse:
+# Set up Argon2 password context
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def create_user(db: Session, user: UserCreate) -> User:
+    # 1. Check if email already exists
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
+    # 2. Hash the plaintext password securely using Argon2
+    secure_password_hash = hash_password(user.password)
+
+    # 3. Create user record
     db_user = User(
         email=user.email,
-        password_hash=user.password_hash,
+        password_hash=secure_password_hash,
         role=user.role,
         first_name=user.first_name,
         last_name=user.last_name,
@@ -24,24 +43,25 @@ def create_user(db: Session, user: UserCreate) -> UserResponse:
     db.refresh(db_user)
     return db_user
 
-def get_user(db: Session, user_id: UUID_SQL) -> UserResponse:
-    db_user = db.query(User).filter(User.id == user_id).first()
+def get_user(db: Session, user_id: UUID_SQL) -> User:
+    db_user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
     if db_user is None:
-        raise ValueError("User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
     return db_user
 
-def update_user(db: Session, user_id: UUID_SQL, user: UserCreate) -> UserResponse:
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if db_user is None:
-        raise ValueError("User not found")
+def update_user(db: Session, user_id: UUID_SQL, first_name: str | None = None, last_name: str | None = None, phone_number: str | None = None) -> User:
+    db_user = get_user(db, user_id) # Reuses the 404 check
     
-    db_user.email = user.email
-    db_user.password_hash = user.password_hash
-    db_user.role = user.role
-    db_user.first_name = user.first_name
-    db_user.last_name = user.last_name
-    db_user.phone_number = user.phone_number
-    db_user.public_key_pem = user.public_key_pem
+    if first_name is not None:
+        db_user.first_name = first_name
+    if last_name is not None:
+        db_user.last_name = last_name
+    if phone_number is not None:
+        db_user.phone_number = phone_number
+        
     db_user.updated_at = datetime.now(timezone.utc)
     
     db.commit()
@@ -49,9 +69,8 @@ def update_user(db: Session, user_id: UUID_SQL, user: UserCreate) -> UserRespons
     return db_user
 
 def delete_user(db: Session, user_id: UUID_SQL) -> None:
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if db_user is None:
-        raise ValueError("User not found")
+    db_user = get_user(db, user_id) # Reuses the 404 check
     
     db_user.deleted_at = datetime.now(timezone.utc)
+    db_user.is_active = False
     db.commit()
