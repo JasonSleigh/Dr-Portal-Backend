@@ -11,4 +11,4 @@ app = FastAPI(
 def root():
 	return {"Message": "Hello World"}
 
-app.include_router(user_router, prefix="/api/v1", target=["users"])
+app.include_router(user_router, prefix="/api/v1")
