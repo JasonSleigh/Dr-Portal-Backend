@@ -1,0 +1,21 @@
+# Virtual environments & caches
+backend/.venv/
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.ruff_cache/
+
+# Local secrets & environment files
+.env
+.env.*
+!.env.example
+
+# Local data / media / VCS
+database_images/
+.git/
+.gitignore
+.vscode/
+*.md
