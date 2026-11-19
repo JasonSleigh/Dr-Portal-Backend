@@ -3,14 +3,11 @@ from uuid import uuid4
 
 from sqlalchemy import Boolean, Column, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base  # Swap for shared Base once your db module is ready
+from src.core.database import Base
 
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-Base = declarative_base()
 
 
 class User(Base):
